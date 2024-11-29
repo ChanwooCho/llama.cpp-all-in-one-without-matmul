@@ -279,7 +279,28 @@ bool gpt_params_find_arg(int argc, char ** argv, const std::string & arg, gpt_pa
     const char split_delim = ',';
 
     llama_sampling_params & sparams = params.sparams;
-
+    // 수정 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    if (arg == "-nah" || arg == "--num-attn-heads") {
+        CHECK_ARG
+        params.nah = std::stoi(argv[i]);
+        return true;
+    }
+    
+    if (arg == "-nkvh" || arg == "--num-kv-heads") {
+        CHECK_ARG
+        params.nkvh = std::stoi(argv[i]);
+        return true;
+    }
+    if (arg == "-rmeh" || arg == "--rm-emb-head") {
+        params.rmeh = true;
+        return true;
+    }
+    if (arg == "-sd" || arg == "--num-sd-batch") {
+        CHECK_ARG
+        params.sd = std::stoi(argv[i]);
+        return true;
+    }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if (arg == "-s" || arg == "--seed") {
         CHECK_ARG
         // TODO: this is temporary, in the future the sampling state will be moved fully to llama_sampling_context.
@@ -1992,6 +2013,7 @@ std::string fs_get_cache_file(const std::string & filename) {
 //
 
 std::tuple<struct llama_model *, struct llama_context *> llama_init_from_gpt_params(gpt_params & params) {
+    // printf("NUM-ATTN-HEAD = %d\n", params.nah);
     auto mparams = llama_model_params_from_gpt_params(params);
 
     llama_model * model = nullptr;
@@ -2083,6 +2105,12 @@ struct llama_model_params llama_model_params_from_gpt_params(const gpt_params & 
     if (params.n_gpu_layers != -1) {
         mparams.n_gpu_layers = params.n_gpu_layers;
     }
+    // 수정 ///////////////////////////////
+    mparams.nah             = params.nah;
+    mparams.nkvh            = params.nkvh;
+    mparams.rmeh            = params.rmeh;
+    mparams.sd              = params.sd;
+    ///////////////////////////////////////
     mparams.rpc_servers     = params.rpc_servers.c_str();
     mparams.main_gpu        = params.main_gpu;
     mparams.split_mode      = params.split_mode;
@@ -2131,7 +2159,7 @@ static ggml_type kv_cache_type_from_str(const std::string & s) {
 
 struct llama_context_params llama_context_params_from_gpt_params(const gpt_params & params) {
     auto cparams = llama_context_default_params();
-
+    
     cparams.n_ctx             = params.n_ctx;
     cparams.n_seq_max         = params.n_parallel;
     cparams.n_batch           = params.n_batch;

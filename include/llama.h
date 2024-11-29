@@ -251,6 +251,10 @@ extern "C" {
 
     struct llama_model_params {
         int32_t n_gpu_layers; // number of layers to store in VRAM
+        uint32_t nah;               // 수정
+        uint32_t nkvh;              // 수정
+        bool rmeh;                  // 수정
+        uint32_t sd;              // 수정
         enum llama_split_mode split_mode; // how to split the model across multiple GPUs
 
         // main_gpu interpretation depends on split_mode:
