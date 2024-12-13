@@ -12223,7 +12223,7 @@ static void ggml_compute_forward_mul_mat(
     }
 UseGgmlGemm1:;
 #endif
-
+    // 일단 여기서 한 번 type 변경해줌.
     if (src1->type != vec_dot_type) {
         char * wdata = params->wdata;
 
@@ -12253,6 +12253,8 @@ UseGgmlGemm1:;
     ggml_barrier(params->shared);
 
 #if GGML_USE_LLAMAFILE
+    // 위 과정에서는 params->wdata에 변경된 type을 저장해줌.
+    // 따라서 아래 if에 다시 한 번 걸리게 됨.
     if (src1->type != vec_dot_type) {
         const void* wdata = (src1->type == vec_dot_type) ? src1->data : params->wdata;
         const size_t row_size = ggml_row_size(vec_dot_type, ne10);
@@ -12275,7 +12277,6 @@ UseGgmlGemm1:;
     }
 UseGgmlGemm2:;
 #endif
-
     // This is the size of the first dimension of the result, so we can iterate that way. (see the ASSERT above, these are the same numbers)
     const int64_t nr0 = ne0;
 

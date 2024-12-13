@@ -865,7 +865,10 @@ class tinyBLAS_Q0_AVX {
  */
 bool llamafile_sgemm(int64_t m, int64_t n, int64_t k, const void *A, int64_t lda, const void *B, int64_t ldb, void *C,
                      int64_t ldc, int ith, int nth, int Atype, int Btype, int Ctype) {
-
+    // A는 Parameters
+    // B는 Activation
+    // C는 Output
+    
     assert(m >= 0);
     assert(n >= 0);
     assert(k >= 0);
@@ -984,7 +987,7 @@ bool llamafile_sgemm(int64_t m, int64_t n, int64_t k, const void *A, int64_t lda
 
         tinyBLAS_Q0_AVX<block_q8_0, block_q8_0, float> tb{
             k, (const block_q8_0 *)A, lda,  // k = A, B tensor의 가로 양자 개수, A는 WEIGHT tensor, lda는 A의 가로 양자 개수
-            (const block_q8_0 *)B, ldb,     // B는 WEIGHT tensor, ldb는 B의 가로 양자 개수 (lda와 ldb는 같아야 한다)
+            (const block_q8_0 *)B, ldb,     // B는 Activation tensor, ldb는 B의 가로 양자 개수 (lda와 ldb는 같아야 한다)
             (float *)C, ldc,                // C는 OUTPUT tensor, ldc는 C의 가로 양자 개수 (나중에 activation tensor가 될 친구)
             ith, nth};
         tb.matmul(m, n);                    // m, n은 OUTPUT tensor의 shape
